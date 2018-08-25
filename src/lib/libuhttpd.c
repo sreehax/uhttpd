@@ -3,15 +3,37 @@
 #include<string.h>
 #include<isc/string.h>
 #include<stdlib.h>
-void http_parser(Headers h, char *input) {
+#include<limits.h>
+Headers http_parser(char *request) {
 	char *token = NULL;
-	char *request = malloc(strlen(input)+1);
-	bzero(request, strlen(input)+1);
-	strlcpy(request, input, strlen(input)+1);
-	token = strtok(request, "\r\n");
-	while(token) {
-		printf("Current token: %s\n", token);
-		token = strtok(NULL, "\r\n");
+	char *saveptr = NULL;
+	char *saveptr1 = NULL;
+	char *token1;
+	char *piece = NULL;
+	Headers h;
+	token = strtok_r(request, "\r\n", &saveptr);
+	if(token) {
+		token1 = malloc(strlen(token)+1);
+		strlcpy(token1, token, strlen(token)+1);
+		piece = strtok_r(token1, " ", &saveptr1);
+		piece = strtok_r(NULL, " ", &saveptr1);
+		if(strncmp(token, "GET", strlen("GET")) == 0) {
+			h.type = GET;
+		} else if(strncmp(token, "POST", strlen("POST")) == 0) {
+			h.type = POST;
+		} else if(strncmp(token, "HEAD", strlen("HEAD")) == 0) {
+			h.type = HEAD;
+		} else {
+			h.type = -1;
+		}
+		h.path = malloc(strlen(piece)+1);
+		strlcpy(h.path, piece, strlen(piece)+1);
+		token = strtok_r(NULL, "\r\n", &saveptr);
 	}
-	return;
+	while(token) {
+		token = strtok_r(NULL, "\r\n", &saveptr);
+	}
+	free(token);
+	free(token1);
+	return h;
 }

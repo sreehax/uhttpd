@@ -76,8 +76,19 @@ void *process(int sock) {
 	if(n < 0) {
 		writelog("reading from socket failed");
 	}
-	Headers h;
-	http_parser(h, buffer);
+	Headers rq = http_parser(buffer);
+	char *type;
+	if(rq.type == GET) {
+		type = "GET";
+	} else if(rq.type == POST) {
+		type = "POST";
+	} else if(rq.type == HEAD) {
+		type = "HEAD";
+	} else {
+		type = "UNKNOWN";
+	}
+	printf("[uhttpd]: Type: %s\n", type);
+	printf("[uhttpd]: Path: %s\n", rq.path);
 	const char *message = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<h1>Hello, World</h1>";
 	n = write(sock, message, strlen(message)+1);
 	if(n < 0) {
