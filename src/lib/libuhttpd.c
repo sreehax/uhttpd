@@ -33,7 +33,5 @@ Headers http_parser(char *request) {
 	while(token) {
 		token = strtok_r(NULL, "\r\n", &saveptr);
 	}
-	free(token);
-	free(token1);
 	return h;
 }
